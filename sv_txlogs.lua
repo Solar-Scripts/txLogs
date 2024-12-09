@@ -228,3 +228,29 @@ AddEventHandler('txAdmin:events:serverShuttingDown', function(eventData)
         end
     end, 'POST', json.encode({ embeds = embed }), { ['Content-Type'] = 'application/json' })
 end)
+
+-- Admin Authenticated or Revoked Event 
+AddEventHandler('txAdmin:events:adminAuth', function(eventData)
+    local netid = eventData.netid or -1
+    local isAdmin = eventData.isAdmin and "Granted" or "Revoked"
+    local username = eventData.username or "Unknown Admin"
+
+    local embed = {
+        {
+            title = "Admin Authentication Update",
+            color = isAdmin == "Granted" and 65280 or 16711680, -- It will be green if the admin has been authed, and red if not.
+            fields = {
+                { name = "Admin Username", value = username, inline = true },
+                { name = "Player Net ID", value = tostring(netid), inline = true },
+                { name = "Admin Status", value = isAdmin, inline = true },
+            },
+            author = { name = "txAdmin Logging System" }
+        }
+    }
+
+    PerformHttpRequest(webhook, function(err, text, headers)
+        if err ~= 204 then
+            print("Failed to send webhook for Admin Authentication Update: " .. tostring(err))
+        end
+    end, 'POST', json.encode({ embeds = embed }), { ['Content-Type'] = 'application/json' })
+end)
